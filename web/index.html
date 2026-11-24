@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sheet Reminders</title>
+<meta name="description" content="A Google Sheets automation that emails payment reminders on a schedule, in English or Hindi, and stops the moment a row is marked Paid.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Sheet Reminders</h1>
+    <p class="tag">Keep your dues in a Google Sheet. Every morning it emails the people who owe you, in English or Hindi, and stops the moment you mark a row Paid. No app, no subscription: it runs inside your own Google account.</p>
+  </header>
+
+  <main class="page">
+    <section class="sim" aria-labelledby="sim-h">
+      <div class="sec-head">
+        <h2 id="sim-h">Try it on a sample sheet</h2>
+        <label class="today">Pretend today is <input id="today" type="date"></label>
+      </div>
+      <p class="fine">This is a tuition centre's fee sheet. Edit any cell, or change the date, and see what would go out that morning.</p>
+      <div class="sheet-wrap">
+        <table class="sheet" id="sheet" aria-label="Payments sheet"></table>
+      </div>
+      <div class="add-row"><button type="button" id="add" class="ghost">+ Add a row</button> <button type="button" id="reset" class="link">Reset sample</button></div>
+    </section>
+
+    <section class="today-out" aria-labelledby="out-h">
+      <h2 id="out-h">This morning's emails <span id="out-count" class="count"></span></h2>
+      <div id="skips"></div>
+      <div id="emails" class="emails"></div>
+    </section>
+
+    <section class="schedule" aria-labelledby="sch-h">
+      <h2 id="sch-h">The schedule</h2>
+      <div class="sch-grid">
+        <label>First reminder <input id="s-before" type="number" min="0" max="30"> days before</label>
+        <label>Follow up <input id="s-after" type="text" spellcheck="false"> days after</label>
+        <label>Then every <input id="s-every" type="number" min="0" max="60"> days</label>
+        <label>Stop after <input id="s-max" type="number" min="0" max="365"> days late</label>
+        <label class="wide">Business name <input id="s-biz" type="text"></label>
+        <label class="wide">Payment link <input id="s-link" type="text" spellcheck="false" placeholder="UPI link or payment page (optional)"></label>
+      </div>
+      <div class="timeline" id="timeline" aria-label="Reminder days for a bill due on day 0"></div>
+    </section>
+
+    <section class="tone" aria-labelledby="tone-h">
+      <h2 id="tone-h">Your words, in your tone</h2>
+      <p>Describe your business and how you talk to customers. Claude writes all six messages (before, on and after the due date, in English and Hindi). Each one is checked before it's used: only known placeholders, and the amount and date must be in it.</p>
+      <textarea id="tone-desc" rows="2">Small tuition centre in Pune. Parents are busy, so keep it friendly and short. Many prefer Hindi.</textarea>
+      <div class="row">
+        <input id="api-key" type="password" autocomplete="off" placeholder="Anthropic API key (sk-ant-...)" spellcheck="false" aria-label="Anthropic API key">
+        <button type="button" id="write" class="primary">Write my messages</button>
+      </div>
+      <p class="fine">Your key stays in this tab and goes only to api.anthropic.com.</p>
+      <p id="tone-status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="install" aria-labelledby="ins-h">
+      <h2 id="ins-h">Put it in your own sheet (5 minutes)</h2>
+      <ol>
+        <li>Open a Google Sheet and go to <b>Extensions → Apps Script</b>.</li>
+        <li>Delete what's there, paste the code below, and press <b>Save</b>.</li>
+        <li>Reload the sheet. A <b>Reminders</b> menu appears. Click <b>Set up sheets and daily 9 AM run</b> and allow access when Google asks.</li>
+        <li>Fill in the <b>Payments</b> sheet: name, email, amount, due date. Put your business name and payment link in <b>Settings</b>.</li>
+        <li>Use <b>Preview today's reminders</b> to check. From then on it runs every morning on its own, and every email sent is listed in <b>Reminder log</b>.</li>
+      </ol>
+      <div class="code-bar"><code>Code.gs</code><span id="code-lines" class="muted"></span><span class="grow"></span><button type="button" id="copy" class="primary">Copy code</button></div>
+      <pre id="code" tabindex="0"></pre>
+      <p class="fine">Emails go out from your own Gmail through Google's MailApp, with a limit of about 100 a day on a free account. "Paid" in the Status column stops reminders for that row. A row never gets two emails on the same day.</p>
+    </section>
+  </main>
+
+  <section class="how" aria-label="How it works">
+    <h2>How it works</h2>
+    <p>Lots of small businesses keep track of who owes them money in a Google Sheet, then chase each person by hand. Sheet Reminders does the chasing. You list each person's name, email, amount and due date. Every morning a small script inside your own Google account checks the sheet. It emails a friendly reminder three days before the due date, on the day, and on a few days after, in English or Hindi. The moment you mark a row Paid, the reminders stop. Every email it sends is written to a log, and Claude can rewrite the messages in your own tone.</p>
+  </section>
+
+  <footer class="foot">
+    <p>The same code decides who gets an email here, in the tests, and in your sheet. The Apps Script file is generated from it.</p>
+  </footer>
+<span class="made-by">Created by Aarov Makhija</span>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>
